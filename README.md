@@ -1,12 +1,12 @@
 # wc-enhanced-form
 Enhancing a form with web components
 
-As a means of exploring the limits and possibilities of web components
+As a means of exploring the limits, possibilities, pain points of web components
 - simple enhancement of html elements
 
 NB the `is` attribute is not supported by Safari. However this is a progressive enhancement, so the form will continue to work correctly.
 
-## Confirm Forn
+## Confirm Form
 
 Extends native form element, inserting a dialog to confirm submission.
 
