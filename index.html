@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Confirm Form</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+  <body>
+    <form is="confirm-form" action="" id="my-form">
+      <label for="name">Name</label>
+      <input type="text" id="name" name="name" />
+      <button type="reset">Reset</button>
+      <button type="submit">Submit</button>
+    </form>
+
+    <template id="confirm-form-template">
+      <dialog>
+        <form method="dialog">
+          Are you sure?
+          <button type="submit" value="confirm">Yes</button>
+          <button type="submit" value="cancel">No</button>
+        </form>
+      </dialog>
+    </template>
+    <script>
+      /**
+       * Boilerplate ajax form handling
+       * Prevent the page reload on submit
+       * get the form data
+       */
+      window.addEventListener("load", () => {
+        const form = document.getElementById("my-form");
+        console.log({ form });
+        form.onsubmit = (event) => {
+          event.preventDefault();
+          const formElement = event.target;
+          const formArray = Array.from(new FormData(formElement));
+          alert(`Form submission confirmed: ${formArray}`);
+        };
+      });
+      /**
+       * Custom Element code
+       * Putting all this inside the html to sidestep the problem of importing html into js
+       */
+      class ConfirmForm extends HTMLFormElement {
+        constructor() {
+          super();
+
+          const dialogElement = this.getDialogElement();
+          // see https://codepen.io/brav0/pen/wYBwBe
+          // binding to submit appears problematic
+          // - returnValue is always old
+          // - submit will not fire if closed with escape key
+          // see also https://developer.mozilla.org/en-US/docs/Web/API/HTMLDialogElement/returnValue re returnValue
+
+          dialogElement.addEventListener("close", () => {
+            if (dialogElement.returnValue === "confirm") {
+              const submitter = this.querySelector('button[type="submit"]');
+              const submitEvent = new SubmitEvent("submit", {
+                submitter,
+              });
+              this.dispatchEvent(submitEvent);
+            }
+          });
+          this.appendChild(dialogElement);
+
+          // suppress the original submit event and show modal
+          this.addEventListener("submit", (event) => {
+            event.preventDefault();
+            if (event.cancelable) {
+              // differentiate between the original event and the one created on confirmation
+              event.stopImmediatePropagation();
+              dialogElement.showModal();
+            }
+          });
+        }
+
+        getDialogElement() {
+          const template = document.querySelector(
+            "template#confirm-form-template"
+          );
+          const clone = template.content.cloneNode(true);
+          return clone.querySelector("dialog");
+        }
+      }
+      customElements.define("confirm-form", ConfirmForm, { extends: "form" });
+    </script>
+  </body>
+</html>
